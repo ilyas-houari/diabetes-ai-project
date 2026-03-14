@@ -1,0 +1,104 @@
+1-Pregnancies
+
+| Value | Meaning          |
+| ----- | ---------------- |
+| 0     | never pregnant   |
+| 2     | pregnant 2 times |
+| 6     | pregnant 6 times |
+
+Pregnancy can influence hormones and glucose levels, which relates to diabetes risk.
+
+------------------------------------------------------------------------------------
+
+2-Glucose
+
+| Value | Meaning      |
+| ----- | ------------ |
+| 85    | normal       |
+| 120   | moderate     |
+| 180   | high glucose |
+
+High glucose = strong indicator of diabetes
+Usually the most important feature in this dataset.
+
+------------------------------------------------------------------------------------
+
+3-BloodPressure
+
+| Value | Meaning |
+| ----- | ------- |
+| 70    | normal  |
+| 90    | high    |
+
+High blood pressure is often linked with metabolic diseases.
+
+------------------------------------------------------------------------------------
+
+4-SkinThickness
+
+| Value | Meaning       |
+| ----- | ------------- |
+| 20    | normal        |
+| 35    | high body fat |
+
+Higher fat can increase diabetes risk.
+
+------------------------------------------------------------------------------------
+
+5-Insulin
+
+| Value | Meaning |
+| ----- | ------- |
+| 80    | normal  |
+| 200   | high    |
+
+Abnormal insulin levels are related to diabetes.
+
+------------------------------------------------------------------------------------
+
+6-BMI (Body Mass Index)
+
+BMI = Weight / Height^2
+
+| BMI   | Meaning    |
+| ----- | ---------- |
+| 18–24 | normal     |
+| 25–29 | overweight |
+| 30+   | obese      |
+
+Higher BMI increases diabetes risk.
+
+------------------------------------------------------------------------------------
+
+7-DiabetesPedigreeFunction
+
+| Value | Meaning           |
+| ----- | ----------------- |
+| 0.2   | low family risk   |
+| 1.2   | high genetic risk |
+
+It represents family history of diabetes.
+
+------------------------------------------------------------------------------------
+
+8-Age
+
+| Value | Meaning    |
+| ----- | ---------- |
+| 21    | young      |
+| 45    | middle age |
+| 60    | older      |
+
+Diabetes risk usually increases with age.
+
+------------------------------------------------------------------------------------
+
+9-Outcome (Target Variable)
+
+| Value | Meaning                        |
+| ----- | ------------------------------ |
+| 0     | patient does NOT have diabetes |
+| 1     | patient HAS diabetes           |
+
+So the model will learn:
+Medical features → Predict Outcome
