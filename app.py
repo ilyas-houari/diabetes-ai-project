@@ -5,7 +5,7 @@ from utils.cleaning import clean_data
 
 from views.overview import show_overview
 from views.data_cleaning import show_cleaning
-
+from views.model_training import show_model
 # =====================================
 # Page configuration
 # =====================================
@@ -39,7 +39,7 @@ df_clean = clean_data(df)
 # =====================================
 section = st.sidebar.selectbox(
     "Choose Section",
-    ["Overview", "Data Cleaning"]
+    ["Overview", "Data Cleaning","Model Training"]
 )
 
 # =====================================
@@ -50,3 +50,6 @@ if section == "Overview":
 
 elif section == "Data Cleaning":
     show_cleaning(df, df_clean)
+    
+elif section == "Model Training":
+    show_model(df_clean)

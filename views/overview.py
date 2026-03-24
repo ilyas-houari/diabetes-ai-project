@@ -11,3 +11,7 @@ def show_overview(df):
 
     st.subheader("Columns")
     st.write(list(df.columns))
+
+    # Add this 👇
+    if "Person" in df.columns:
+        st.info("The column 'Person' is an identifier and will not be used for model training.")
