@@ -7,12 +7,53 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import matplotlib.pyplot as plt
 import numpy as np
 
-def show_model(df_clean):
-    st.header("3. Model Training")
-
+def train_model(df_clean):
     # Features & target
     X = df_clean.drop("Outcome", axis=1)
     y = df_clean["Outcome"]
+
+    # Train / Test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.2,
+        random_state=42
+    )
+
+    # Train Logistic Regression
+    lr_model = LogisticRegression(max_iter=1000)
+    lr_model.fit(X_train, y_train)
+    y_pred_lr = lr_model.predict(X_test)
+
+    # Train Random Forest
+    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_model.fit(X_train, y_train)
+    y_pred_rf = rf_model.predict(X_test)
+
+    return {
+        "X": X,
+        "y": y,
+        "X_train": X_train,
+        "X_test": X_test,
+        "y_train": y_train,
+        "y_test": y_test,
+        "lr_model": lr_model,
+        "rf_model": rf_model,
+        "y_pred_lr": y_pred_lr,
+        "y_pred_rf": y_pred_rf
+    }
+
+
+def show_model(df_clean):
+    st.header("3. Model Training")
+
+    results = train_model(df_clean)
+
+    X = results["X"]
+    X_train = results["X_train"]
+    X_test = results["X_test"]
+    y_test = results["y_test"]
+    y_pred_lr = results["y_pred_lr"]
+    y_pred_rf = results["y_pred_rf"]
 
     # -------------------------
     # Features
@@ -29,12 +70,6 @@ def show_model(df_clean):
     # -------------------------
     # Train / Test split
     # -------------------------
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=0.2,
-        random_state=42
-    )
-
     st.subheader("Train / Test Split")
 
     col1, col2 = st.columns(2)
@@ -43,49 +78,29 @@ def show_model(df_clean):
     with col2:
         st.metric("Test Rows", X_test.shape[0])
 
-
-    # =========================
-    # Train Logistic Regression
-    # =========================
-    lr_model = LogisticRegression(max_iter=1000)
-    lr_model.fit(X_train, y_train)
-
-    y_pred_lr = lr_model.predict(X_test)
-
     st.success("Logistic Regression trained ✅")
-
-    # =========================
-    # Train Random Forest
-    # =========================
-    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf_model.fit(X_train, y_train)
-
-    y_pred_rf = rf_model.predict(X_test)
-
     st.success("Random Forest trained ✅")
 
     st.subheader("Prediction Sample")
 
-    results = pd.DataFrame({
+    results_df = pd.DataFrame({
         "Real": y_test.values[:10],
         "Logistic Regression": y_pred_lr[:10],
         "Random Forest": y_pred_rf[:10]
     })
 
-    st.dataframe(results, width=300)
-    
+    st.dataframe(results_df, width=300)
+
     # =========================
     # Model Evaluation
     # =========================
     st.subheader("Model Comparison")
 
-    # Logistic Regression metrics
     acc_lr = accuracy_score(y_test, y_pred_lr)
     prec_lr = precision_score(y_test, y_pred_lr)
     rec_lr = recall_score(y_test, y_pred_lr)
     f1_lr = f1_score(y_test, y_pred_lr)
 
-    # Random Forest metrics
     acc_rf = accuracy_score(y_test, y_pred_rf)
     prec_rf = precision_score(y_test, y_pred_rf)
     rec_rf = recall_score(y_test, y_pred_rf)
@@ -99,7 +114,6 @@ def show_model(df_clean):
 
     st.dataframe(metrics_df, width=500)
 
-
     # =========================
     # Confusion Matrix
     # =========================
@@ -107,24 +121,55 @@ def show_model(df_clean):
 
     cm = confusion_matrix(y_test, y_pred_rf)
 
-    fig, ax = plt.subplots(figsize=(3,2))
-
+    fig, ax = plt.subplots(figsize=(3, 2))
     ax.imshow(cm, cmap="Blues")
 
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            ax.text(j, i, cm[i, j],
-                    ha="center", va="center", color="black", fontsize=8)
+            ax.text(j, i, cm[i, j], ha="center", va="center", color="black", fontsize=8)
 
     ax.set_xlabel("Predicted")
     ax.set_ylabel("Actual")
 
-    ax.set_xticks([0,1])
-    ax.set_yticks([0,1])
+    ax.set_xticks([0, 1])
+    ax.set_yticks([0, 1])
 
     ax.set_xticklabels(["No", "Yes"])
     ax.set_yticklabels(["No", "Yes"])
 
     plt.tight_layout()
-
     st.pyplot(fig, use_container_width=False)
+    
+    # =========================
+    # Feature Importance
+    # =========================
+    st.subheader("Feature Importance")
+
+    importances = results["rf_model"].feature_importances_
+    features = results["X"].columns
+
+    
+
+    importance_df = pd.DataFrame({
+        "Feature": features,
+        "Importance": importances
+    }).sort_values(by="Importance", ascending=False)
+
+    st.dataframe(importance_df, width=400)
+    
+    #
+    fig2, ax2 = plt.subplots(figsize=(3,2))
+
+    ax2.barh(importance_df["Feature"], importance_df["Importance"])
+    ax2.invert_yaxis()
+
+    ax2.set_title("Feature Importance")
+    ax2.set_xlabel("Importance")
+
+    ax2.set_title("Feature Importance", fontsize=8)
+    ax2.set_xlabel("Importance", fontsize=7)
+
+    ax2.tick_params(axis='y', labelsize=7)
+    ax2.tick_params(axis='x', labelsize=7)
+    plt.tight_layout()
+    st.pyplot(fig2, use_container_width=False)
