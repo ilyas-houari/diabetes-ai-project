@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,51 +43,61 @@ def show_model(df_clean):
     with col2:
         st.metric("Test Rows", X_test.shape[0])
 
-    # -------------------------
-    # Train model
-    # -------------------------
-    model = LogisticRegression(max_iter=1000)
-    model.fit(X_train, y_train)
 
-    st.success("Model trained successfully ✅")
+    # =========================
+    # Train Logistic Regression
+    # =========================
+    lr_model = LogisticRegression(max_iter=1000)
+    lr_model.fit(X_train, y_train)
 
-    # -------------------------
-    # Predictions
-    # -------------------------
-    y_pred = model.predict(X_test)
+    y_pred_lr = lr_model.predict(X_test)
+
+    st.success("Logistic Regression trained ✅")
+
+    # =========================
+    # Train Random Forest
+    # =========================
+    rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf_model.fit(X_train, y_train)
+
+    y_pred_rf = rf_model.predict(X_test)
+
+    st.success("Random Forest trained ✅")
 
     st.subheader("Prediction Sample")
 
     results = pd.DataFrame({
         "Real": y_test.values[:10],
-        "Predicted": y_pred[:10]
+        "Logistic Regression": y_pred_lr[:10],
+        "Random Forest": y_pred_rf[:10]
     })
 
     st.dataframe(results, width=300)
     
     # =========================
-    # Evaluation Metrics
+    # Model Evaluation
     # =========================
-    st.subheader("Model Evaluation")
+    st.subheader("Model Comparison")
 
-    accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
-    f1 = f1_score(y_test, y_pred)
+    # Logistic Regression metrics
+    acc_lr = accuracy_score(y_test, y_pred_lr)
+    prec_lr = precision_score(y_test, y_pred_lr)
+    rec_lr = recall_score(y_test, y_pred_lr)
+    f1_lr = f1_score(y_test, y_pred_lr)
 
-    col1, col2, col3, col4 = st.columns(4)
+    # Random Forest metrics
+    acc_rf = accuracy_score(y_test, y_pred_rf)
+    prec_rf = precision_score(y_test, y_pred_rf)
+    rec_rf = recall_score(y_test, y_pred_rf)
+    f1_rf = f1_score(y_test, y_pred_rf)
 
-    with col1:
-        st.metric("Accuracy", f"{accuracy:.2f}")
+    metrics_df = pd.DataFrame({
+        "Metric": ["Accuracy", "Precision", "Recall", "F1-score"],
+        "Logistic Regression": [acc_lr, prec_lr, rec_lr, f1_lr],
+        "Random Forest": [acc_rf, prec_rf, rec_rf, f1_rf]
+    })
 
-    with col2:
-        st.metric("Precision", f"{precision:.2f}")
-
-    with col3:
-        st.metric("Recall", f"{recall:.2f}")
-
-    with col4:
-        st.metric("F1-score", f"{f1:.2f}")
+    st.dataframe(metrics_df, width=500)
 
 
     # =========================
@@ -94,7 +105,7 @@ def show_model(df_clean):
     # =========================
     st.subheader("Confusion Matrix")
 
-    cm = confusion_matrix(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred_rf)
 
     fig, ax = plt.subplots(figsize=(3,2))
 
